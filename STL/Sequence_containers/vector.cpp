@@ -5,6 +5,7 @@
 namespace D34D {
 	template <class T, class Allocator = _STD allocator <T>>
 	class vector {
+	public:
 		typedef T value_type;
 		typedef Allocator allocator_type;
 		typedef _STD size_t size_type;
@@ -17,7 +18,8 @@ namespace D34D {
 		typedef const value_type* const_iterator;
 		typedef _STD reverse_iterator<iterator>	reverse_iterator;
 		typedef _STD reverse_iterator<const_iterator> const_reverse_iterator;
-		value_type *arr;
+	private:
+		iterator arr;
 		size_type reserved;
 		size_type _size;
 	public:
@@ -33,7 +35,7 @@ namespace D34D {
 			}
 		}
 		~vector() { delete[] arr; }
-		vector& operator=(vector &arg) noexcept;// TODO
+		vector& operator=(vector &arg) noexcept;
 		void assign(size_type cnt, const value_type& value);
 		allocator_type get_allocator() const;
 		///
@@ -73,13 +75,66 @@ namespace D34D {
 		void resize(size_type count);
 		void swap(vector& other) noexcept;
 	};
+	template <class T, class Allocator>
+	bool operator==(const vector<T, Allocator>& lhs, const vector<T, Allocator>& rhs) {
+		if (lhs.size() == rhs.size())
+		{
+			for (typename vector<T, Allocator>::const_iterator i = lhs.cbegin(), j = rhs.cbegin(); i != lhs.cend(); i++, j++)
+				if (*i != *j) return 0;
+			return 1;
+		}
+		return 0;
+	}
 
+	template <class T, class Allocator>
+	bool operator!=(const vector<T, Allocator>& lhs, const vector<T, Allocator>& rhs) {
+		return !(lhs == rhs);
+	}
+
+	template <class T, class Allocator>
+	bool operator<(const vector<T, Allocator>& lhs, const vector<T, Allocator>& rhs) {
+		for (typename vector<T>::const_iterator i = lhs.cbegin(), j = rhs.cbegin(); i != lhs.cend(); ++i, ++j)
+		{
+			if (*i < *j) return 1;
+			else return 0;
+		}
+	}
+
+	template <class T, class Allocator>
+	bool operator<=(const vector<T, Allocator>& lhs, const vector<T, Allocator>& rhs) {
+		for (typename vector<T>::const_iterator i = lhs.cbegin(), j = rhs.cbegin(); i != lhs.cend(); ++i, ++j)
+		{
+			if (*i <= *j) return 1;
+			else return 0;
+		}
+	}
+
+	template <class T, class Allocator>
+	bool operator>=(const vector<T, Allocator>& lhs, const vector<T, Allocator>& rhs) {
+		for (typename vector<T>::const_iterator i = lhs.cbegin(), j = rhs.cbegin(); i != lhs.cend(); ++i, ++j)
+		{
+			if (*i >= *j) return 1;
+			else return 0;
+		}
+	}
+
+	template <class T, class Allocator>
+	bool operator>(const vector<T, Allocator>& lhs, const vector<T, Allocator>& rhs) {
+		for (typename vector<T>::const_iterator i = lhs.cbegin(), j = rhs.cbegin(); i != lhs.cend(); ++i, ++j)
+		{
+			if (*i > *j) return 1;
+			else return 0;
+		}
+	}
 }
 using namespace D34D;
 
 template <class T, class Allocator>
 typename vector<T, Allocator>::vector& vector<T, Allocator>::operator=(vector &arg) noexcept {
-	return (arr = arg.arr);
+	resize(arg._size);
+	for (size_type i = 0, j = 0; i < arg._size; i++, j++)
+		arr[i] = arg.arr[j];
+	return (*this);
 }
 
 template <class T, class Allocator>
@@ -325,17 +380,25 @@ int main() {
 	vector <int> sdf = {9,7,6,7,6,7,5,4,3,2,2,5,6,7,4};
 	df.swap(sdf);
 	_STD cout << "size = " << df.size() << '\n';
+	std::cout << '\n';
+	_STD copy(sdf.begin(), sdf.end(), _STD ostream_iterator<int>(_STD cout, " "));
 	///
 	vector<int> myvector{};
 	int *p = myvector.get_allocator().allocate(5);
 	unsigned i;
 	for (i = 0; i<5; i++) myvector.get_allocator().construct(&p[i], i);
 
-	std::cout << "The allocated array contains:";
+	std::cout << "\nThe allocated array contains:";
 	for (i = 0; i<5; i++) std::cout << ' ' << p[i];
 	///
-	std::cout << '\n';
-	_STD copy(sdf.begin(), sdf.end(), _STD ostream_iterator<int>(_STD cout, " "));
+	vector<int> ter{6,7,4,3};
+	vector<int> puk{ 9,8,7,6,7,8,6,5,4,4,4,12,2,7,4,3 };
+	ter = puk;
+	_STD cout << "\noperator = ";
+	_STD copy(ter.begin(), ter.end(), _STD ostream_iterator<int>(_STD cout, " "));
+
+	if (ter == puk)
+		_STD cout << "\n\ntrue\n";
 	system("pause");
 	return 0;
 }
